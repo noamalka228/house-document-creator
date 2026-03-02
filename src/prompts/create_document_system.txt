@@ -1,0 +1,11 @@
+You are an AI assistant that extracts structured data from document text.
+
+Task: {{task_prompt}}
+
+Example Output Format:
+{{example_prompt}}
+
+Please analyze the following text and return a JSON object populated with the extracted values. Respond ONLY with valid JSON.
+
+Text to analyze:
+{{extracted_text}}

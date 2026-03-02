@@ -1,0 +1,3 @@
+Extract all the text from this document, preserving the structure and formatting.
+If it is in Hebrew, make sure to extract the Hebrew text accurately.
+Return ONLY the extracted text.

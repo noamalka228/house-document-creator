@@ -1,58 +1,52 @@
-import { OcrSpaceTextExtractor } from './OcrSpaceTextExtractor';
-import { LlmDocumentCreator } from './LlmDocumentCreator';
-import { PriceProposalDocument } from '../domain/entities/PriceProposalDocument';
-import { BillDocument } from '../domain/entities/BillDocument';
+import * as fs from 'fs';
+import * as path from 'path';
 import { BaseDocument } from '../domain/entities/BaseDocument';
-import { CsvFormatter } from './CsvFormatter';
+import { XlsxFormatter } from './XlsxFormatter';
+import { documentStrategyRegistry } from './DocumentStrategyRegistry';
+import { LlmTextExtractor } from './LlmTextExtractor';
+import { LlmDocumentCreator } from './LlmDocumentCreator';
 
 export interface ProcessedDocumentResult {
     document: BaseDocument;
-    csvHead: string;
-    csvData: string;
+    xlsxBase64: string;
 }
 
-const LLM_TEMPLATES: Record<string, { prompt: string, example: string, docClass: any }> = {
-    price_proposal: {
-        prompt: "Extract contractorName, projectDescription, and totalPrice from the price proposal.",
-        example: "{ contractorName: 'Name', projectDescription: 'Details', totalPrice: 1000 }",
-        docClass: PriceProposalDocument
-    },
-    bill: {
-        prompt: "Extract providerName, totalAmount, and dueDate from the bill.",
-        example: "{ providerName: 'Provider', totalAmount: 150.00, dueDate: 'YYYY-MM-DD' }",
-        docClass: BillDocument
-    }
-};
+// We define the supported types statically for strict TypeScript type checking.
+// These must correspond to the strategies registered in DocumentStrategyRegistry.
+export const IMAGE_TYPES = ['price_proposal', 'bill'] as const;
+export type ImageType = typeof IMAGE_TYPES[number];
+
+export function isValidDocType(docType: string): boolean {
+    return documentStrategyRegistry.getAllTypes().includes(docType);
+}
 
 export class DocumentProcessingService {
-    public async processDocument(
+    public async extractText(
         imageBuffer: Buffer,
+        imageType: ImageType
+    ): Promise<string> {
+        const extractor = new LlmTextExtractor();
+        return await extractor.extractText(imageBuffer, imageType);
+    }
+
+    public async createDocumentFromText(
+        extractedText: string,
         documentType: string,
-        fileName: string
+        fileName?: string,
     ): Promise<ProcessedDocumentResult> {
-        // Find the template configuration for this document type
-        const config = LLM_TEMPLATES[documentType];
+        const strategy = documentStrategyRegistry.getStrategy(documentType);
 
-        if (!config) {
-            throw new Error(`Unsupported document type: ${documentType}`);
-        }
+        const promptContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.promptFilePath), 'utf-8');
+        const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'utf-8');
+        const creator = new LlmDocumentCreator(promptContent, templateContent, strategy.documentClass);
 
-        // Initialize dependencies
-        const extractor = new OcrSpaceTextExtractor();
-        const creator = new LlmDocumentCreator(extractor, config.prompt, config.example, config.docClass);
-
-        // Process and generate the domain entity
-        const document = await creator.createDocument(imageBuffer, fileName || `Unnamed_${new Date().toISOString()}`);
-
-        // Format the document representations
-        const formatter = new CsvFormatter();
-        const csvHead = formatter.formatHeaders(document.exportData());
-        const csvData = document.export(formatter);
+        const document = await creator.createDocument(extractedText, fileName || `Unnamed_${new Date().toISOString()}`, templateContent);
+        const formatter = new XlsxFormatter();
+        const buffer = formatter.format(document.exportData());
 
         return {
             document,
-            csvHead,
-            csvData
+            xlsxBase64: buffer.toString('base64')
         };
     }
 }

@@ -1,0 +1,1 @@
+Extract providerName, totalAmount, and dueDate from the bill.
