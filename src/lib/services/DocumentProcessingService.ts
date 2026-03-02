@@ -42,7 +42,7 @@ export class DocumentProcessingService {
 
         const document = await creator.createDocument(extractedText, fileName || `Unnamed_${new Date().toISOString()}`, templateContent);
         const formatter = new XlsxFormatter();
-        const buffer = formatter.format(document.exportData());
+        const buffer = await formatter.format(document.exportData());
 
         return {
             document,

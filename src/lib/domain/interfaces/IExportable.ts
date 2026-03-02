@@ -3,5 +3,5 @@ import { IFormatter } from './IFormatter';
 
 export interface IExportable<TOut> {
   exportData(): Record<string, any>;
-  export(formatter: IFormatter<TOut>): TOut;
+  export(formatter: IFormatter<TOut>): TOut | Promise<TOut>;
 }

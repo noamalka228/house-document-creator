@@ -16,7 +16,7 @@ export abstract class BaseDocument implements IExportable<string> {
 
     abstract exportData(): Record<string, any>;
 
-    export(formatter: IFormatter<string>): string {
+    export(formatter: IFormatter<string>): string | Promise<string> {
         return formatter.format(this.exportData());
     }
 }

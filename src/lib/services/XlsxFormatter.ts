@@ -1,11 +1,19 @@
 import { IFormatter } from '../domain/interfaces/IFormatter';
-import * as xlsx from 'xlsx';
+import * as ExcelJS from 'exceljs';
 
 export class XlsxFormatter implements IFormatter<Buffer> {
-    format(data: Record<string, any>): Buffer {
-        const workSheet = xlsx.utils.json_to_sheet([data]);
-        const workBook = xlsx.utils.book_new();
-        xlsx.utils.book_append_sheet(workBook, workSheet, "Document");
-        return xlsx.write(workBook, { type: 'buffer', bookType: 'xlsx' });
+    async format(data: Record<string, any>): Promise<Buffer> {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Document");
+
+        // Setup columns dynamically based on data keys
+        const keys = Object.keys(data);
+        worksheet.columns = keys.map(key => ({ header: key, key: key }));
+
+        // Add single row of data
+        worksheet.addRow(data);
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        return buffer as unknown as Buffer;
     }
 }
