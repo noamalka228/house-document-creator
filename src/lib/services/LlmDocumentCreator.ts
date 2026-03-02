@@ -15,7 +15,7 @@ export class LlmDocumentCreator {
     }
 
     async createDocument(extractedText: string, documentName: string, templateBase64?: string): Promise<BaseDocument> {
-        const systemPromptTemplate = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create_document_system.txt'), 'utf-8');
+        const systemPromptTemplate = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create-document.txt'), 'utf-8');
         const systemPrompt = systemPromptTemplate
             .replace('{{task_prompt}}', this.prompt)
             .replace('{{example_prompt}}', this.exampleFileContent)

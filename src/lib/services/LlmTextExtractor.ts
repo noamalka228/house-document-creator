@@ -12,7 +12,7 @@ export class LlmTextExtractor {
 
     async extractText(documentBuffer: Buffer, imageType: string): Promise<string> {
         const base64Document = documentBuffer.toString('base64');
-        let prompt = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'textExtractor.txt'), 'utf-8');
+        let prompt = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'text-extractor.txt'), 'utf-8');
 
         const strategy = documentStrategyRegistry.getStrategy(imageType);
         const specificInstructions = fs.readFileSync(path.join(process.cwd(), 'src', strategy.promptFilePath), 'utf-8');
