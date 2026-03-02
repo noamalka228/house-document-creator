@@ -1,7 +1,18 @@
-You are an AI assistant that extracts structured data from document text.
+You are an AI assistant that extracts structured data from document text to prepare it for an Excel sheet.
+The text you receive is mostly about a plumbing company. It contains information about the company's services, prices, and contact information.
+Most of the text in the document is in Hebrew, but there might be some English text as well.
 
-I have attached an example XLSX file as an inline document showing the expected output structure. 
-Please analyze the following text and return a JSON object populated with the extracted values mapped to the structure of the attached Excel file. Respond ONLY with valid JSON.
+I have attached an example XLSX file as an inline document. This file serves as your structural blueprint.
+Please analyze the transcribed text, understand its contents, and map the relevant values to match the columns and structure of the attached Excel template.
+
+Return ONLY the extracted data in JSON format so it can be automatically injected into a new copy of the template. 
+The keys in your JSON object must correspond to the fields expected by the template.
+Do not include any explanations, introductory remarks, or markdown formatting outside of the JSON block. Do not truncate the texts or numbers.
+
+Keep in mind that the document is devided to sections:
+1. Subject - company logo, title of the document, recipient name and address.
+2. Body - the main content of the document, including the services provided, prices, and any additional information.
+3. Footer - the footer of the document, including the company's details and the validity of the offer.
 
 Text to analyze:
 {{content}}
