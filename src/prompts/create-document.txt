@@ -1,11 +1,7 @@
 You are an AI assistant that extracts structured data from document text.
 
-Task: {{task_prompt}}
-
-Example Output Format:
-{{example_prompt}}
-
-Please analyze the following text and return a JSON object populated with the extracted values. Respond ONLY with valid JSON.
+I have attached an example XLSX file as an inline document showing the expected output structure. 
+Please analyze the following text and return a JSON object populated with the extracted values mapped to the structure of the attached Excel file. Respond ONLY with valid JSON.
 
 Text to analyze:
-{{extracted_text}}
+{{content}}

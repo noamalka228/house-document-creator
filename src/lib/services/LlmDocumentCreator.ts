@@ -16,19 +16,9 @@ export class LlmDocumentCreator {
         if (!templateBase64) return new GenericDocument(documentName, content);
         if (!strategy) throw new Error('Strategy is required for template-based document creation');
 
-        const systemPrompt = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create-document.txt'), 'utf-8');
-        const parts: any[] = [{ text: systemPrompt }];
-
-        parts.unshift({ text: "Here is an example XLSX file showing the expected output structure:" });
-        parts.push({
-            inlineData: {
-                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                data: templateBase64
-            }
-        });
-        parts.push({ text: `\n\nHere is the extracted text content to be structured and merged according to the template:\n${content}` });
-
+        const { systemInstruction, parts } = this.buildPrompt(content, templateBase64);
         const responseText = await this.llmService.generateContent({
+            systemInstruction,
             parts,
             responseMimeType: 'application/json'
         });
@@ -37,5 +27,18 @@ export class LlmDocumentCreator {
         const data = JSON.parse(rawJson);
 
         return strategy.createDocument(documentName, content, data);
+    }
+
+    private buildPrompt(content: string, templateBase64: string): { systemInstruction: string, parts: any[] } {
+        let systemInstruction = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create-document.txt'), 'utf-8');
+        systemInstruction = systemInstruction.replace('{{content}}', content);
+
+        const parts: any[] = [{
+            inlineData: {
+                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                data: templateBase64
+            }
+        }];
+        return { systemInstruction, parts };
     }
 }
