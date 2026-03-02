@@ -33,13 +33,13 @@ export class DocumentProcessingService {
         documentType: DocumentType,
         fileName?: string,
     ): Promise<ProcessedDocumentResult> {
-        const strategy = documentStrategyRegistry.getStrategy(documentType);
-
-        const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'utf-8');
-        const creator = new LlmDocumentCreator(strategy.documentClass);
-
         const documentName = fileName || `Unnamed_${new Date().toISOString()}`;
-        const document = await creator.createDocument(extractedText, documentName, templateContent);
+        const strategy = documentStrategyRegistry.getStrategy(documentType);
+        const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'utf-8');
+
+        const creator = new LlmDocumentCreator();
+        const document = await creator.createDocument(extractedText, documentName, templateContent, strategy);
+
         const formatter = new XlsxFormatter();
         const buffer = await formatter.format(document.exportData());
 
