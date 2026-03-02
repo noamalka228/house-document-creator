@@ -13,8 +13,8 @@ export interface ProcessedDocumentResult {
 
 // We define the supported types statically for strict TypeScript type checking.
 // These must correspond to the strategies registered in DocumentStrategyRegistry.
-export const IMAGE_TYPES = ['price_proposal', 'bill'] as const;
-export type ImageType = typeof IMAGE_TYPES[number];
+export const DOCUMENT_TYPES = ['price_proposal', 'bill'] as const;
+export type DocumentType = typeof DOCUMENT_TYPES[number];
 
 export function isValidDocType(docType: string): boolean {
     return documentStrategyRegistry.getAllTypes().includes(docType);
@@ -23,24 +23,23 @@ export function isValidDocType(docType: string): boolean {
 export class DocumentProcessingService {
     public async extractText(
         imageBuffer: Buffer,
-        imageType: ImageType
     ): Promise<string> {
         const extractor = new LlmTextExtractor();
-        return await extractor.extractText(imageBuffer, imageType);
+        return await extractor.extractText(imageBuffer);
     }
 
     public async createDocumentFromText(
         extractedText: string,
-        documentType: string,
+        documentType: DocumentType,
         fileName?: string,
     ): Promise<ProcessedDocumentResult> {
         const strategy = documentStrategyRegistry.getStrategy(documentType);
 
-        const promptContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.promptFilePath), 'utf-8');
         const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'utf-8');
-        const creator = new LlmDocumentCreator(promptContent, templateContent, strategy.documentClass);
+        const creator = new LlmDocumentCreator(strategy.documentClass);
 
-        const document = await creator.createDocument(extractedText, fileName || `Unnamed_${new Date().toISOString()}`, templateContent);
+        const documentName = fileName || `Unnamed_${new Date().toISOString()}`;
+        const document = await creator.createDocument(extractedText, documentName, templateContent);
         const formatter = new XlsxFormatter();
         const buffer = await formatter.format(document.exportData());
 

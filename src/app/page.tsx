@@ -34,14 +34,13 @@ export default function Home() {
   };
 
   const handleExtractText = async () => {
-    if (!file || !docType) return;
+    if (!file) return;
     setLoading(true);
     setExtractedText(null);
     setResult(null);
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('documentType', docType);
 
     try {
       const res = await fetch('/api/extract-text', {

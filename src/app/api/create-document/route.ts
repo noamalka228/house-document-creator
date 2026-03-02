@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocumentProcessingService } from '@/lib/services/DocumentProcessingService';
+import { DocumentProcessingService, isValidDocType, type DocumentType } from '@/lib/services/DocumentProcessingService';
 
 export async function POST(req: NextRequest) {
     try {
@@ -9,12 +9,14 @@ export async function POST(req: NextRequest) {
         const fileName = formData.get('fileName') as string;
 
         if (!content) return NextResponse.json({ error: 'No text content provided' }, { status: 400 });
-        if (!docType) return NextResponse.json({ error: 'No document type provided' }, { status: 400 });
+        if (!docType || !isValidDocType(docType)) {
+            return NextResponse.json({ error: 'Invalid document type' }, { status: 400 });
+        }
 
         const processingService = new DocumentProcessingService();
         const result = await processingService.createDocumentFromText(
             content,
-            docType,
+            docType as DocumentType,
             fileName
         );
 

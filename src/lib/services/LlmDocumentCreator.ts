@@ -7,20 +7,13 @@ export class LlmDocumentCreator {
     private llmService: LlmService;
 
     constructor(
-        private prompt: string,
-        private exampleFileContent: string,
         private docClassType: new (...args: any[]) => BaseDocument
     ) {
         this.llmService = new LlmService();
     }
 
     async createDocument(extractedText: string, documentName: string, templateBase64?: string): Promise<BaseDocument> {
-        const systemPromptTemplate = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create-document.txt'), 'utf-8');
-        const systemPrompt = systemPromptTemplate
-            .replace('{{task_prompt}}', this.prompt)
-            .replace('{{example_prompt}}', this.exampleFileContent)
-            .replace('{{extracted_text}}', extractedText);
-
+        const systemPrompt = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'create-document.txt'), 'utf-8');
         const parts: any[] = [{ text: systemPrompt }];
 
         if (templateBase64) {
