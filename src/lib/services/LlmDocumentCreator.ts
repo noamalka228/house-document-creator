@@ -1,6 +1,7 @@
 import { BaseDocument } from '../domain/entities/BaseDocument';
 import { GenericDocument } from '../domain/entities/GenericDocument';
 import { IDocumentTypeStrategy } from '../domain/interfaces/IDocumentTypeStrategy';
+import { EXCEL_MIME_TYPE } from '../constants';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LlmService } from './LlmService';
@@ -35,7 +36,7 @@ export class LlmDocumentCreator {
 
         const parts: any[] = [{
             inlineData: {
-                mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                mimeType: EXCEL_MIME_TYPE,
                 data: templateBase64
             }
         }];
