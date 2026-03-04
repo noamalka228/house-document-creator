@@ -1,15 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BaseDocument } from '../domain/entities/BaseDocument';
-import { GenericDocument } from '../domain/entities/GenericDocument';
+import { ExcelDocument } from '../domain/entities/ExcelDocument';
 import { documentStrategyRegistry } from './DocumentStrategyRegistry';
 import { LlmTextExtractor } from './LlmTextExtractor';
 import { LlmDocumentCreator } from './LlmDocumentCreator';
-
-export interface ProcessedDocumentResult {
-    document: BaseDocument;
-    xlsxBase64: string;
-}
 
 // We define the supported types statically for strict TypeScript type checking.
 // These must correspond to the strategies registered in DocumentStrategyRegistry.
@@ -32,7 +26,7 @@ export class DocumentProcessingService {
         extractedText: string,
         documentType: DocumentType,
         fileName?: string,
-    ): Promise<ProcessedDocumentResult> {
+    ): Promise<ExcelDocument> {
         const documentName = fileName || `Unnamed_${new Date().toISOString()}`;
         const strategy = documentStrategyRegistry.getStrategy(documentType);
 
@@ -42,11 +36,6 @@ export class DocumentProcessingService {
         const creator = new LlmDocumentCreator();
         const xlsxBase64 = await creator.createDocument(extractedText, templateContent);
 
-        const document = new GenericDocument(documentName, extractedText);
-
-        return {
-            document,
-            xlsxBase64
-        };
+        return new ExcelDocument(documentName, extractedText, xlsxBase64);
     }
 }

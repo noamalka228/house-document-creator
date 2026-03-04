@@ -3,8 +3,7 @@ import { useState } from 'react';
 import { Buffer } from 'buffer';
 import {
   Container, Typography, Box, Button, MenuItem, Select,
-  InputLabel, FormControl, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, CircularProgress, TextField
+  InputLabel, FormControl, Paper, CircularProgress, TextField
 } from '@mui/material';
 import { EXCEL_MIME_TYPE } from '@/lib/constants';
 
@@ -90,25 +89,30 @@ export default function Home() {
   };
 
   const downloadXLSX = (dataToDownload?: any) => {
-    const activeResult = dataToDownload || result;
-    if (!activeResult?.xlsxBase64) return;
+    try {
+      const activeResult = dataToDownload || result;
+      if (!activeResult?.document?.xlsxBase64) throw new Error("No Excel data found in response.");
 
-    const buffer = Buffer.from(activeResult.xlsxBase64, 'base64');
-    const blob = new Blob([buffer], { type: EXCEL_MIME_TYPE });
+      const buffer = Buffer.from(activeResult.document.xlsxBase64, 'base64');
+      const blob = new Blob([buffer], { type: EXCEL_MIME_TYPE });
 
-    let downloadName = `${docType}_export.xlsx`;
-    if (activeResult.document && activeResult.document.name) {
-      const baseName = activeResult.document.name.split('.').slice(0, -1).join('.') || activeResult.document.name;
-      downloadName = `${baseName}.xlsx`;
+      let downloadName = `${docType}_export.xlsx`;
+      if (activeResult.document && activeResult.document.name) {
+        const baseName = activeResult.document.name.split('.').slice(0, -1).join('.') || activeResult.document.name;
+        downloadName = `${baseName}.xlsx`;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', downloadName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(`Download failed: ${err}`);
     }
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', downloadName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (
@@ -180,35 +184,6 @@ export default function Home() {
               {loading && extractedText !== null ? <CircularProgress size={24} color="inherit" /> : 'Accept & Generate Document'}
             </Button>
           </Box>
-        </Paper>
-      )}
-
-      {result && result.document && (
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h6">Step 3: Extracted Data</Typography>
-            <Button variant="contained" color="secondary" onClick={downloadXLSX}>
-              Download XLSX
-            </Button>
-          </Box>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell><strong>Field</strong></TableCell>
-                  <TableCell><strong>Value</strong></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {Object.entries(result.document).map(([key, val]) => (
-                  <TableRow key={key}>
-                    <TableCell sx={{ textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1')}</TableCell>
-                    <TableCell>{String(val)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
         </Paper>
       )}
     </Container>

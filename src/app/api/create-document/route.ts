@@ -21,8 +21,7 @@ export async function POST(req: NextRequest) {
         );
 
         return NextResponse.json({
-            document: result.document,
-            xlsxBase64: result.xlsxBase64
+            document: result
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
