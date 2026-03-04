@@ -1,10 +1,7 @@
-import { BaseDocument } from '../domain/entities/BaseDocument';
-import { GenericDocument } from '../domain/entities/GenericDocument';
-import { IDocumentTypeStrategy } from '../domain/interfaces/IDocumentTypeStrategy';
-import { EXCEL_MIME_TYPE } from '../constants';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LlmService } from './LlmService';
+import { EXCEL_MIME_TYPE } from '../constants';
 
 export class LlmDocumentCreator {
     private llmService: LlmService;
@@ -13,21 +10,21 @@ export class LlmDocumentCreator {
         this.llmService = new LlmService();
     }
 
-    async createDocument(content: string, documentName: string, templateBase64?: string, strategy?: IDocumentTypeStrategy): Promise<BaseDocument> {
-        if (!templateBase64) return new GenericDocument(documentName, content);
-        if (!strategy) throw new Error('Strategy is required for template-based document creation');
+    async createDocument(content: string, templateBase64: string): Promise<string> {
+        if (!templateBase64) throw new Error('Template is required for document creation');
 
         const { systemInstruction, parts } = this.buildPrompt(content, templateBase64);
         const responseText = await this.llmService.generateContent({
             systemInstruction,
             parts,
-            responseMimeType: 'application/json'
+            responseMimeType: 'text/plain'
         });
 
-        const rawJson = responseText || '{}';
-        const data = JSON.parse(rawJson);
+        // The LLM might wrap the base64 string in markdown blocks like ````base64 ... ```` or just spaces
+        let base64 = responseText || '';
+        base64 = base64.replace(/```(?:base64)?\n?/i, '').replace(/```$/i, '').trim();
 
-        return strategy.createDocument(documentName, content, data);
+        return base64;
     }
 
     private buildPrompt(content: string, templateBase64: string): { systemInstruction: string, parts: any[] } {

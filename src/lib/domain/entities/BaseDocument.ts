@@ -1,7 +1,4 @@
-import { IExportable } from '../interfaces/IExportable';
-import { IFormatter } from '../interfaces/IFormatter';
-
-export abstract class BaseDocument implements IExportable<string> {
+export abstract class BaseDocument {
     public id: string;
     public createdAt: Date;
     public name: string;
@@ -12,11 +9,5 @@ export abstract class BaseDocument implements IExportable<string> {
         this.createdAt = new Date();
         this.name = name;
         this.content = content;
-    }
-
-    abstract exportData(): Record<string, any>;
-
-    export(formatter: IFormatter<string>): string | Promise<string> {
-        return formatter.format(this.exportData());
     }
 }

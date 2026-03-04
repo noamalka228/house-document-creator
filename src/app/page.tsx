@@ -6,6 +6,7 @@ import {
   InputLabel, FormControl, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, CircularProgress, TextField
 } from '@mui/material';
+import { EXCEL_MIME_TYPE } from '@/lib/constants';
 
 const SUPPORTED_DOC_TYPES = [
   { value: 'bill', label: 'Bill' },
@@ -79,6 +80,8 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error);
 
       setResult(data);
+
+      downloadXLSX(data);
     } catch (err: any) {
       alert(`Error generating document: ${err.message}`);
     } finally {
@@ -86,16 +89,23 @@ export default function Home() {
     }
   };
 
-  const downloadXLSX = () => {
-    if (!result?.xlsxBase64) return;
+  const downloadXLSX = (dataToDownload?: any) => {
+    const activeResult = dataToDownload || result;
+    if (!activeResult?.xlsxBase64) return;
 
-    const buffer = Buffer.from(result.xlsxBase64, 'base64');
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const buffer = Buffer.from(activeResult.xlsxBase64, 'base64');
+    const blob = new Blob([buffer], { type: EXCEL_MIME_TYPE });
+
+    let downloadName = `${docType}_export.xlsx`;
+    if (activeResult.document && activeResult.document.name) {
+      const baseName = activeResult.document.name.split('.').slice(0, -1).join('.') || activeResult.document.name;
+      downloadName = `${baseName}.xlsx`;
+    }
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `${docType}_export.xlsx`);
+    link.setAttribute('download', downloadName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

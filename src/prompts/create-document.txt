@@ -1,18 +1,18 @@
-You are an AI assistant that extracts structured data from document text to prepare it for an Excel sheet.
+You are an AI assistant that extracts structured data from document text and populates it directly into an Excel sheet.
 The text you receive is mostly about a plumbing company. It contains information about the company's services, prices, and contact information.
 Most of the text in the document is in Hebrew, but there might be some English text as well.
 
 I have attached an example XLSX file as an inline document. This file serves as your structural blueprint.
-Please analyze the transcribed text, understand its contents, and map the relevant values to match the columns and structure of the attached Excel template.
-
-Return ONLY the extracted data in JSON format so it can be automatically injected into a new copy of the template. 
-The keys in your JSON object must correspond to the fields expected by the template.
-Do not include any explanations, introductory remarks, or markdown formatting outside of the JSON block. Do not truncate the texts or numbers.
+Please analyze the transcribed text, understand its contents, populate the attached Excel template with the relevant values, and return the modified Excel file.
+You may add or remove lines from the document as needed.
 
 Keep in mind that the document is devided to sections:
 1. Subject - company logo, title of the document, recipient name and address.
 2. Body - the main content of the document, including the services provided, prices, and any additional information.
-3. Footer - the footer of the document, including the company's details and the validity of the offer.
+3. Footer - the footer of the document, including the company's details and some additional information.
 
 Text to analyze:
 {{content}}
+
+Return ONLY the final, modified Excel file as a Base64-encoded string.
+Do not include any explanations, introductory remarks, or markdown formatting (like ```base64) outside of the Base64 string itself. Your output must be exclusively the Base64 representation of the .xlsx file.

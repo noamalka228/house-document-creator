@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BaseDocument } from '../domain/entities/BaseDocument';
-import { XlsxFormatter } from './XlsxFormatter';
+import { GenericDocument } from '../domain/entities/GenericDocument';
 import { documentStrategyRegistry } from './DocumentStrategyRegistry';
 import { LlmTextExtractor } from './LlmTextExtractor';
 import { LlmDocumentCreator } from './LlmDocumentCreator';
@@ -35,17 +35,18 @@ export class DocumentProcessingService {
     ): Promise<ProcessedDocumentResult> {
         const documentName = fileName || `Unnamed_${new Date().toISOString()}`;
         const strategy = documentStrategyRegistry.getStrategy(documentType);
-        const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'utf-8');
+
+        // Read template as base64 string
+        const templateContent = fs.readFileSync(path.join(process.cwd(), 'src', strategy.templateFilePath), 'base64');
 
         const creator = new LlmDocumentCreator();
-        const document = await creator.createDocument(extractedText, documentName, templateContent, strategy);
+        const xlsxBase64 = await creator.createDocument(extractedText, templateContent);
 
-        const formatter = new XlsxFormatter();
-        const buffer = await formatter.format(document.exportData());
+        const document = new GenericDocument(documentName, extractedText);
 
         return {
             document,
-            xlsxBase64: buffer.toString('base64')
+            xlsxBase64
         };
     }
 }
