@@ -19,7 +19,16 @@ export class DocumentProcessingService {
         imageBuffer: Buffer,
     ): Promise<string> {
         const extractor = new LlmTextExtractor();
-        return await extractor.extractText(imageBuffer);
+        const extractedText = await extractor.extractText(imageBuffer);
+        return this.formatExtractedText(extractedText);
+    }
+
+    private formatExtractedText(text: string): string {
+        let formattedText = text.replace(/\\n/g, '\n');
+        if (formattedText.startsWith('"') && formattedText.endsWith('"')) {
+            formattedText = formattedText.slice(1, -1);
+        }
+        return formattedText;
     }
 
     public async createDocumentFromText(

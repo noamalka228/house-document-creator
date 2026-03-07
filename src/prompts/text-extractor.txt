@@ -3,14 +3,11 @@ The documents you recieve are handwritten, and are mostly about a plumbing compa
 Extracted text will later be used to create a new document, so make sure to extract the text accurately.
 Extract all the text from this document, preserving the structure and formatting.
 Most of the text in the document is in Hebrew, but there might be some English text as well.
-Return ONLY the extracted text in JSON format.
-This JSON must contain only one field named "content", which holds the full transcribed text.
-Do not include any explanations, introductory remarks, or markdown formatting outside of the JSON block. Do not truncate the text.
+Return ONLY the extracted text as a string.
+Do not include any explanations, introductory remarks, or markdown formatting outside of the string. Do not truncate the text.
 
 Expected output format:
-{
-    "content": "extracted-text-here"
-}
+"extracted-text-here"
 
 Some of the characters are not standard Hebrew characters, so make sure to extract them accurately.
 For example:
