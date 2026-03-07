@@ -17,9 +17,10 @@ export function isValidDocType(docType: string): boolean {
 export class DocumentProcessingService {
     public async extractText(
         imageBuffer: Buffer,
+        mimeType?: string
     ): Promise<string> {
         const extractor = new LlmTextExtractor();
-        const extractedText = await extractor.extractText(imageBuffer);
+        const extractedText = await extractor.extractText(imageBuffer, mimeType);
         return this.formatExtractedText(extractedText);
     }
 

@@ -5,6 +5,7 @@ export interface LlmRequestOptions {
     systemInstruction?: string;
     responseMimeType?: string;
     model?: string;
+    temperature?: number;
 }
 
 export class LlmService {
@@ -25,14 +26,7 @@ export class LlmService {
 
     async generateContent(options: LlmRequestOptions): Promise<string> {
         try {
-            const config: any = {};
-            if (options.systemInstruction) {
-                config.systemInstruction = options.systemInstruction;
-            }
-            if (options.responseMimeType) {
-                config.responseMimeType = options.responseMimeType;
-            }
-
+            const config = this.buildConfig(options);
             const response = await this.ai.models.generateContent({
                 model: options.model || this.defaultModel,
                 contents: [
@@ -49,5 +43,13 @@ export class LlmService {
             // Log or handle common errors here if needed
             throw new Error(`LLM Execution failed: ${error.message}`);
         }
+    }
+
+    private buildConfig(options: LlmRequestOptions): any {
+        const config: any = {};
+        config.systemInstruction = options.systemInstruction || undefined;
+        config.responseMimeType = options.responseMimeType || undefined;
+        config.temperature = options.temperature || undefined;
+        return config;
     }
 }

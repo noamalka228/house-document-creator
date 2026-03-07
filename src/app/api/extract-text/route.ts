@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         const bufferContent = Buffer.from(arrayBuffer);
 
         const processingService = new DocumentProcessingService();
-        const text = await processingService.extractText(bufferContent);
+        const text = await processingService.extractText(bufferContent, file.type);
 
         return NextResponse.json({ content: text });
     } catch (error: any) {

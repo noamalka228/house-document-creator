@@ -9,7 +9,7 @@ export class LlmTextExtractor {
         this.llmService = new LlmService();
     }
 
-    async extractText(documentBuffer: Buffer): Promise<string> {
+    async extractText(documentBuffer: Buffer, mimeType: string = 'image/jpeg'): Promise<string> {
         const base64Document = documentBuffer.toString('base64');
         const systemPrompt = fs.readFileSync(path.join(process.cwd(), 'src', 'prompts', 'text-extractor.txt'), 'utf-8');
 
@@ -17,12 +17,13 @@ export class LlmTextExtractor {
             parts: [
                 {
                     inlineData: {
-                        mimeType: 'image/jpeg',
+                        mimeType,
                         data: base64Document
                     }
                 }
             ],
-            systemInstruction: systemPrompt
+            systemInstruction: systemPrompt,
+            temperature: 0
         });
     }
 }
