@@ -11,6 +11,6 @@ Expected output format:
 
 Some of the characters are not standard Hebrew characters, so make sure to extract them accurately.
 For example:
-1. "Ø" should be extracted as is.
+1. "Ø" should be extracted as "קוטר", as it is a short form of the word Diameter in Hebrew.
 2. "H" should be extracted as "גובה", as it is a short form of the word Height in Hebrew.
 3. "''X", where X is a number, should be extracted as "X צו"ל". This is a known shortcut.
